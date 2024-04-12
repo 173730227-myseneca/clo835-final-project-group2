@@ -1,0 +1,43 @@
+
+name: Deploy images to S3 Bucket for Clo835-final-project
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    name: Final images
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Build and package Docker images
+        id: build-images
+        run: |
+          cd clo835-final-project-group2
+          ls -ltra
+          # Build image for mysql db
+          docker build -t db_image:v0.2 -f Dockerfile_mysql .
+          # Save the Docker image as a tarball
+          docker save -o db_image.tar db_image:v0.2
+          # Build image for application
+          docker build -t app_image:v0.2 -f Dockerfile .
+          # Save the Docker image as a tarball
+          docker save -o app_image.tar app_image:v0.2
+
+      - name: Upload Docker image tarballs to S3
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --acl public-read --follow-symlinks --delete
+        env:
+          AWS_S3_BUCKET: your-s3-bucket-name
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-1
+          SOURCE_DIR: .
+
+     
