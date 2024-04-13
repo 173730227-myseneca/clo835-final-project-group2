@@ -1,35 +1,56 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: flask-app
+  name: webapp
+  namespace: final
+  labels:
+    app: employee
+
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: flask-app
+      app: employee
+
   template:
     metadata:
       labels:
-        app: flask-app
+        app: employee
+
     spec:
+      serviceAccountName: clo835
       containers:
-      - name: flask-app
-        image: <your_ecr_image>
-        ports:
-        - containerPort: 5000
-        env:
-        - name: BACKGROUND_IMAGE_URL
-          valueFrom:
-            configMapKeyRef:
-              name: app-config
-              key: background-image-url
-        - name: MYSQL_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: mysql-secret
-              key: username
-        - name: MYSQL_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mysql-secret
-              key: password
+        - name: application-container
+          image: 
+          imagePullPolicy: Always
+          env:
+            - name: DBPWD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: MYSQL_ROOT_PASSWORD
+            - name: DBHOST
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: DBHOST
+            - name: DBUSER
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: DBUSER   
+            - name: DBPORT
+              value: "3306"
+  
+          envFrom:
+            - configMapRef:
+                name: clo835    
+          ports:
+            - containerPort: 81
+          resources:
+            limits:
+              cpu: "0.5"
+            requests:
+              cpu: "0.5"
+            
+           
