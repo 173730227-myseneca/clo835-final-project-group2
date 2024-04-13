@@ -3,6 +3,7 @@ from pymysql import connections
 import os
 import random
 import argparse
+import boto3
 
 
 app = Flask(__name__)
@@ -11,8 +12,14 @@ DBHOST = os.environ.get("DBHOST") or "localhost"
 DBUSER = os.environ.get("DBUSER") or "root"
 DBPWD = os.environ.get("DBPWD") or "passwors"
 DATABASE = os.environ.get("DATABASE") or "employees"
-COLOR_FROM_ENV = os.environ.get('APP_COLOR') or "lime"
+# COLOR_FROM_ENV = os.environ.get('APP_COLOR') or "lime"
 DBPORT = int(os.environ.get("DBPORT"))
+
+#Added for enhancement
+IMAGE_LINK = os.environ.get("IMAGE_LINK") or "https://clo835-group2-bucket.s3.amazonaws.com/test-image.jpg"
+BUCKET_NAME = IMAGE_LINK[IMAGE_LINK.rfind('//')+2:IMAGE_LINK.index('.')]
+IMAGE_NAME = IMAGE_LINK[IMAGE_LINK.rfind('/')+1:]
+GROUP_NAME = os.environ.get("GROUP_NAME") or "group-2"
 
 # Create a connection to the MySQL database
 db_conn = connections.Connection(
@@ -27,31 +34,39 @@ output = {}
 table = 'employee';
 
 # Define the supported color codes
-color_codes = {
-    "red": "#e74c3c",
-    "green": "#16a085",
-    "blue": "#89CFF0",
-    "blue2": "#30336b",
-    "pink": "#f4c2c2",
-    "darkblue": "#130f40",
-    "lime": "#C1FF9C",
-}
+# color_codes = {
+#     "red": "#e74c3c",
+#     "green": "#16a085",
+#     "blue": "#89CFF0",
+#     "blue2": "#30336b",
+#     "pink": "#f4c2c2",
+#     "darkblue": "#130f40",
+#     "lime": "#C1FF9C",
+# }
 
 
 # Create a string of supported colors
-SUPPORTED_COLORS = ",".join(color_codes.keys())
+#SUPPORTED_COLORS = ",".join(color_codes.keys())
 
 # Generate a random color
-COLOR = random.choice(["red", "green", "blue", "blue2", "darkblue", "pink", "lime"])
+#COLOR = random.choice(["red", "green", "blue", "blue2", "darkblue", "pink", "lime"])
 
 
 @app.route("/", methods=['GET', 'POST'])
 def home():
-    return render_template('addemp.html', color=color_codes[COLOR])
+    print("Image "+IMAGE_NAME+" is fetched from: "+IMAGE_LINK)
+
+    s3 = boto3.resource('s3')
+    if not os.path.exists("static"):
+            os.makedirs("static")
+    output = os.path.join("static", IMAGE_NAME)
+    s3.Bucket(BUCKET_NAME).download_file(IMAGE_NAME, output)
+
+    return render_template('addemp.html', image="static/"+IMAGE_NAME, group=GROUP_NAME)
 
 @app.route("/about", methods=['GET','POST'])
 def about():
-    return render_template('about.html', color=color_codes[COLOR])
+    return render_template('about.html', image="static/"+IMAGE_NAME, group=GROUP_NAME)
     
 @app.route("/addemp", methods=['POST'])
 def AddEmp():
@@ -75,11 +90,11 @@ def AddEmp():
         cursor.close()
 
     print("all modification done...")
-    return render_template('addempoutput.html', name=emp_name, color=color_codes[COLOR])
+    return render_template('addempoutput.html', name=emp_name, image="static/"+IMAGE_NAME, group=GROUP_NAME)
 
 @app.route("/getemp", methods=['GET', 'POST'])
 def GetEmp():
-    return render_template("getemp.html", color=color_codes[COLOR])
+    return render_template("getemp.html", image="static/"+IMAGE_NAME, group=GROUP_NAME)
 
 
 @app.route("/fetchdata", methods=['GET','POST'])
@@ -108,29 +123,32 @@ def FetchData():
         cursor.close()
 
     return render_template("getempoutput.html", id=output["emp_id"], fname=output["first_name"],
-                           lname=output["last_name"], interest=output["primary_skills"], location=output["location"], color=color_codes[COLOR])
+                           lname=output["last_name"], interest=output["primary_skills"], location=output["location"], image="static/"+IMAGE_NAME, group=GROUP_NAME)
 
 if __name__ == '__main__':
     
     # Check for Command Line Parameters for color
     parser = argparse.ArgumentParser()
-    parser.add_argument('--color', required=False)
+    parser.add_argument('--imageurl', required=False)
     args = parser.parse_args()
 
-    if args.color:
-        print("Color from command line argument =" + args.color)
-        COLOR = args.color
-        if COLOR_FROM_ENV:
-            print("A color was set through environment variable -" + COLOR_FROM_ENV + ". However, color from command line argument takes precendence.")
-    elif COLOR_FROM_ENV:
-        print("No Command line argument. Color from environment variable =" + COLOR_FROM_ENV)
-        COLOR = COLOR_FROM_ENV
-    else:
-        print("No command line argument or environment variable. Picking a Random Color =" + COLOR)
+    if args.imageurl:
+        print("S3 image URL from command line argument =" + args.imageurl)
+        IMAGE_LINK = args.imageurl
+    # if args.color:
+    #     print("Color from command line argument =" + args.color)
+    #     COLOR = args.color
+    #     if COLOR_FROM_ENV:
+    #         print("A color was set through environment variable -" + COLOR_FROM_ENV + ". However, color from command line argument takes precendence.")
+    # elif COLOR_FROM_ENV:
+    #     print("No Command line argument. Color from environment variable =" + COLOR_FROM_ENV)
+    #     COLOR = COLOR_FROM_ENV
+    # else:
+    #     print("No command line argument or environment variable. Picking a Random Color =" + COLOR)
 
-    # Check if input color is a supported one
-    if COLOR not in color_codes:
-        print("Color not supported. Received '" + COLOR + "' expected one of " + SUPPORTED_COLORS)
-        exit(1)
+    # # Check if input color is a supported one
+    # if COLOR not in color_codes:
+    #     print("Color not supported. Received '" + COLOR + "' expected one of " + SUPPORTED_COLORS)
+    #     exit(1)
 
     app.run(host='0.0.0.0',port=8080,debug=True)
