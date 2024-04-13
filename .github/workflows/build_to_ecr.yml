@@ -45,7 +45,7 @@ jobs:
           # Docker build command
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f Dockerfile_mysql .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker run -e MYSQL_ROOT_PASSWORD=pw mysql:latest
+          docker run -d -e MYSQL_ROOT_PASSWORD=pw mysql:latest
       # Runs a set of commands using the runners shell
       - name: Push image webapp to Amazon ECR
         env:
@@ -58,4 +58,4 @@ jobs:
           # Docker build command
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker run -p 8080:8080 -e DBHOST=172.17.0.2 -e DBPORT=3306 -e DBUSER=root -e DBPWD=pw webapp:latest
+          docker run -d -p 8080:8080 -e DBHOST=172.17.0.2 -e DBPORT=3306 -e DBUSER=root -e DBPWD=pw webapp:latest
