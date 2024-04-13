@@ -40,7 +40,7 @@ jobs:
           ECR_REPOSITORY: mysql
           IMAGE_TAG: latest
         run: |
-          cd app_code/
+          cd application_code/
           ls -ltra
           # Docker build command
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f Dockerfile_mysql .
@@ -53,7 +53,7 @@ jobs:
           ECR_REPOSITORY: webapp
           IMAGE_TAG: latest
         run: |
-          cd app_code/
+          cd application_code/
           ls -ltra
           # Docker build command
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f Dockerfile .
