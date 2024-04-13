@@ -4,5 +4,5 @@ metadata:
   name: clo835
   namespace: final
 data:
-  BACKGROUND_IMAGE: ""
-  GROUP_NAME: "Group2"
+  BACKGROUND_IMAGE: "https://clo835-group2-bucket.s3.amazonaws.com/small-dog.jpg"
+  GROUP_NAME: "group-2"
