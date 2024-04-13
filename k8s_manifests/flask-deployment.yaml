@@ -20,8 +20,8 @@ spec:
     spec:
       serviceAccountName: clo835
       containers:
-        - name: application-container
-          image: 
+        - name: webapp
+          image: 579130819361.dkr.ecr.us-east-1.amazonaws.com/webapp:latest
           imagePullPolicy: Always
           env:
             - name: DBPWD
