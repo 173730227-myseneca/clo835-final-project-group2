@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp
+  namespace: final
+  labels:
+    app: employee
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: employee
+
+  template:
+    metadata:
+      labels:
+        app: employee
+
+    spec:
+      serviceAccountName: clo835
+      containers:
+        - name: webapp
+          image: 579130819361.dkr.ecr.us-east-1.amazonaws.com/webapp:latest
+          imagePullPolicy: Always
+          env:
+            - name: DBPWD
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: MYSQL_ROOT_PASSWORD
+            - name: DBHOST
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: DBHOST
+            - name: DBUSER
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: DBUSER   
+            - name: DBPORT
+              value: "3306"
+            - name: IMAGE_LINK
+              valueFrom:
+                configMapKeyRef:
+                  name: clo835
+                  key: BACKGROUND_IMAGE
+            - name: GROUP_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: clo835
+                  key: GROUP_NAME
+          envFrom:
+            - configMapRef:
+                name: clo835    
+          ports:
+            - containerPort: 81
+          resources:
+            limits:
+              cpu: "0.5"
+            requests:
+              cpu: "0.5"

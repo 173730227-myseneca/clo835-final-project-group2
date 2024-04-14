@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clo835
+  namespace: final
+data:
+  BACKGROUND_IMAGE: "https://clo835-group2-bucket.s3.amazonaws.com/test-image.jpg"
+  GROUP_NAME: "group-2"
