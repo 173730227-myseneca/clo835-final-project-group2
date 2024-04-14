@@ -27,21 +27,30 @@ spec:
             - name: DBPWD
               valueFrom:
                 secretKeyRef:
-                  name: db-secret
+                  name: secrets
                   key: MYSQL_ROOT_PASSWORD
             - name: DBHOST
               valueFrom:
                 secretKeyRef:
-                  name: db-secret
+                  name: secrets
                   key: DBHOST
             - name: DBUSER
               valueFrom:
                 secretKeyRef:
-                  name: db-secret
+                  name: secrets
                   key: DBUSER   
             - name: DBPORT
               value: "3306"
-  
+            - name: IMAGE_LINK
+              valueFrom:
+                configMapKeyRef:
+                  name: clo835
+                  key: BACKGROUND_IMAGE
+            - name: GROUP_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: clo835
+                  key: GROUP_NAME
           envFrom:
             - configMapRef:
                 name: clo835    
@@ -52,5 +61,3 @@ spec:
               cpu: "0.5"
             requests:
               cpu: "0.5"
-            
-           

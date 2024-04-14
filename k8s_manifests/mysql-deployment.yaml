@@ -26,25 +26,6 @@ spec:
                 secretKeyRef:
                   name: secrets
                   key: MYSQL_ROOT_PASSWORD
-            - name: MYSQL_DATABASE
-              value: my_database
-            - name: MYSQL_USER
-              valueFrom:
-                secretKeyRef:
-                  name: secrets
-                  key: DBUSER
-            - name: MYSQL_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: secrets
-                  key: DBPWD
-            - name: MYSQL_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: secrets
-                  key: DBHOST
-            - name: MYSQL_PORT
-              value: "3306"
           ports:
             - containerPort: 3306
           volumeMounts:
